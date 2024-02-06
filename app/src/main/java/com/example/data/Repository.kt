@@ -52,3 +52,5 @@ class Repository @Inject constructor(private val api: CartoonApiService) {
         return characterLv
     }
 }
+
+

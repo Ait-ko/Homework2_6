@@ -1,11 +1,17 @@
 package com.example.ui
 
 import android.os.Bundle
+import android.view.View
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
 import com.example.homework2_6.R
+import com.example.homework2_6.Status
 import com.example.homework2_6.databinding.ActivitySecondBinding
+import com.example.model.Character
 import dagger.hilt.android.AndroidEntryPoint
 
 
@@ -15,7 +21,9 @@ class SecondActivity : AppCompatActivity() {
     private val binding: ActivitySecondBinding by lazy {
         ActivitySecondBinding.inflate(layoutInflater)
     }
-    private val viewModel: SecondViewModel by viewModels()
+    private val viewModel by lazy {
+        ViewModelProvider(this)[SecondViewModel::class.java]
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,11 +47,41 @@ class SecondActivity : AppCompatActivity() {
         tvStatus.text= it.status
         Glide.with(image).load(it.image).into(image)
 
-        when (it.status) {
-            "Alive" -> imgCircleStatus.setBackgroundResource(R.drawable.alive)
-            "Dead" -> imgCircleStatus.setBackgroundResource(R.drawable.death)
-            "Unknown" -> imgCircleStatus.setBackgroundResource(R.drawable.unknown)
+        val statusImage = Status(imgCircleStatus)
+        statusImage.setStatusImage(it.status)
+
+        val episodeData = arrayOf(
+            it.name,
+            it.species,
+            it.gender)
+
+        val spinner = binding.spinner
+
+        val adapter = ArrayAdapter(
+            this@SecondActivity,
+            R.layout.custom_spinner,
+            R.id.tv_custom_spinner,
+            episodeData
+        )
+        spinner.adapter = adapter
+
+        spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(
+                parentView: AdapterView<*>?,
+                selectedItemView: View?,
+                position: Int,
+                id: Long
+            ) {
+                spinner.setSelection(0, true)
+            }
+
+            override fun onNothingSelected(parentView: AdapterView<*>?) {
+            }
         }
+    }
+
+    companion object {
+        const val CHARACTER_ID_ARG = "key"
     }
 
 
