@@ -30,7 +30,17 @@ class MainActivity : AppCompatActivity() {
         //viewModel = ViewModelProvider(this)[MainViewModel::class.java]
         viewModel.getAllData().observe(this) { charachers ->
             //val adapter = CharacterAdapter(this::onClick, it)
-            characterAdapter.setCharacter(charachers)
+            binding.progressIndicator.isVisible = state is Resource.Loading
+            when (state) {
+                is Resource.Error -> {
+                    Toast.makeText(this, state.message, Toast.LENGTH_SHORT).show()
+                }
+                is Resource.Loading -> {}
+                is Resource.Success -> {
+                    if (state.data != null)
+                        characterAdapter.setCharacter(state.data)
+                }
+            }
         }
         //binding.recyclerView.adapter = adapter
     }

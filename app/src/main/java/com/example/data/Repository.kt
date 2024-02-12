@@ -10,23 +10,25 @@ import retrofit2.Response
 import javax.inject.Inject
 
 class Repository @Inject constructor(private val api: CartoonApiService) {
-    fun getCharacters(): MutableLiveData<List<Character>> {
-        val characters = MutableLiveData<List<Character>>()
-
-        api.getCharacters().enqueue(object : Callback<BaseResponse<Character>>{
+    fun getCharacters(): MutableLiveData<Resource<List<Character>>> {
+        val characters = MutableLiveData<Resource<List<Character>>>()
+        characters.postValue(Resource.Loading())
+        api.getCharacters().enqueue(object : Callback<BaseResponse> {
             override fun onResponse(
-                call: Call<BaseResponse<Character>>,
-                response: Response<BaseResponse<Character>>
+                call: Call<BaseResponse>,
+                response: Response<BaseResponse>
             ) {
-                if (response.isSuccessful && response.body() != null) {
+                if (response.isSuccessful && response.body() != null && response.code() in 200..300) {
                     response.body()?.let {
-                        characters.postValue(it.results)
+                        characters.postValue(
+                            Resource.Success(it.results)
+                        )
                     }
                 }
             }
 
-            override fun onFailure(call: Call<BaseResponse<Character>>, t: Throwable) {
-                Log.e("ololo", t.message.toString())
+            override fun onFailure(call: Call<BaseResponse>, t: Throwable) {
+                characters.postValue(Resource.Error(t.message ?: "Unknown error!"))
             }
 
         })
@@ -40,7 +42,7 @@ class Repository @Inject constructor(private val api: CartoonApiService) {
                 call: Call<Character>,
                 response: Response<Character>
             ) {
-                response.body().let {
+                response.body()?.let {
                     characterLv.postValue(it)
                 }
             }
@@ -52,5 +54,4 @@ class Repository @Inject constructor(private val api: CartoonApiService) {
         return characterLv
     }
 }
-
 
