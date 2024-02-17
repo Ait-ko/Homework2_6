@@ -2,7 +2,7 @@ package com.example.model
 
 import java.io.Serializable
 
-data class BaseResponse<T>(
+data class BaseResponse(
     var results: List<Character>
 ) : Serializable
 
